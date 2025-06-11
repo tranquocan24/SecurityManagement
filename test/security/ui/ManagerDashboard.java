@@ -24,16 +24,8 @@ public class ManagerDashboard extends JFrame {
         tabbedPane.addTab("Leave Requests", createLeaveTab());
         tabbedPane.addTab("Routine Overview", createRoutineTab());
 
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.addActionListener(e -> {
-            dispose(); // Close the manager dashboard
-            new LoginFrame(); // Replace with your login screen class
-        });
-
-        // 🔲 Create a panel with BorderLayout to contain tabs and logout
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
-        mainPanel.add(logoutButton, BorderLayout.SOUTH); // Bottom
 
         add(mainPanel);
         setVisible(true);
@@ -52,8 +44,11 @@ public class ManagerDashboard extends JFrame {
         Timer timer = new Timer(30000, e -> updateRoutineTable(model));
         timer.start();
 
-        JButton exitBtn = new JButton("Exit");
-        exitBtn.addActionListener(e -> tabbedPane.setSelectedIndex(0));
+        JButton exitBtn = new JButton("Log Out");
+        exitBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame();
+        });
 
         panel.add(new JScrollPane(routineTable), BorderLayout.CENTER);
         panel.add(exitBtn, BorderLayout.SOUTH);
@@ -109,14 +104,19 @@ public class ManagerDashboard extends JFrame {
         loadEmployees(empModel);
 
         JButton editRoutineBtn = new JButton("Edit Routine");
-        JButton exitBtn = new JButton("Exit");
+        JButton exitBtn = new JButton("Log Out");
         JButton viewRoutineBtn = new JButton("View Routine");
 
         JPanel bottom = new JPanel();
         bottom.add(editRoutineBtn);
         bottom.add(exitBtn);
         bottom.add(viewRoutineBtn);
+        JButton reloadBtn = new JButton("reload");
+        reloadBtn.addActionListener(e -> {
+            loadEmployees(empModel);
 
+        });
+        panel.add(reloadBtn, BorderLayout.EAST);
         editRoutineBtn.addActionListener(e -> {
             int selectedRow = empTable.getSelectedRow();
             if (selectedRow >= 0) {
@@ -137,7 +137,10 @@ public class ManagerDashboard extends JFrame {
             }
         });
 
-        exitBtn.addActionListener(e -> tabbedPane.setSelectedIndex(0));
+        exitBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame();
+        });
 
         panel.add(new JScrollPane(empTable), BorderLayout.CENTER);
         panel.add(bottom, BorderLayout.SOUTH);
@@ -145,8 +148,11 @@ public class ManagerDashboard extends JFrame {
     }
 
     private void loadEmployees(DefaultTableModel model) {
+
+        
         try (BufferedReader br = new BufferedReader(new FileReader("employees.txt"))) {
             String line;
+            model.setRowCount(0);
             while ((line = br.readLine()) != null) {
                 String[] p = line.split("\\|");
                 if (p.length >= 6)
@@ -166,7 +172,7 @@ public class ManagerDashboard extends JFrame {
 
         JButton approveBtn = new JButton("Approve");
         JButton declineBtn = new JButton("Decline");
-        JButton exitBtn = new JButton("Exit");
+        JButton exitBtn = new JButton("Log Out");
 
         JPanel btnPanel = new JPanel();
         btnPanel.add(approveBtn);
@@ -175,7 +181,11 @@ public class ManagerDashboard extends JFrame {
 
         approveBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Approved"));
         declineBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Declined"));
-        exitBtn.addActionListener(e -> tabbedPane.setSelectedIndex(0));
+
+        exitBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame();
+        });
 
         panel.add(new JScrollPane(leaveTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
@@ -207,12 +217,16 @@ public class ManagerDashboard extends JFrame {
 
         String empId = (String) model.getValueAt(row, 0);
         String date = (String) model.getValueAt(row, 1);
+        int leave = 0;
         model.setValueAt(status, row, 2);
 
         List<String> updated = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader("leave_requests.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
+                if (line.startsWith(empId) && line.contains("Approved")) {
+                    leave++;
+                }
                 if (line.startsWith(empId + "|" + date + "|")) {
                     updated.add(empId + "|" + date + "|" + status);
                 } else {
@@ -254,6 +268,34 @@ public class ManagerDashboard extends JFrame {
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter("routines.txt"))) {
                 for (String s : routineUpdated) {
+                    bw.write(s);
+                    bw.newLine();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            List<String> employeesUpdated = new ArrayList<>();
+            try (BufferedReader br = new BufferedReader(new FileReader("employees.txt"))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] p = line.split("\\|");
+                    if (p.length >= 6) {
+                        String rEmpId = p[0];
+                        if ((rEmpId.equals(empId))) {
+                            line = p[0] + "|" + p[1] + "|" + p[2] + "|" + p[3] + "|" + leave + "|" + p[5]
+                                    + "|" + p[6];
+                            employeesUpdated.add(line);
+                        } else {
+                            employeesUpdated.add(line);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter("employees.txt"))) {
+                for (String s : employeesUpdated) {
                     bw.write(s);
                     bw.newLine();
                 }
