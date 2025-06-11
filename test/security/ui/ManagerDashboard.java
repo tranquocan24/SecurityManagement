@@ -24,7 +24,18 @@ public class ManagerDashboard extends JFrame {
         tabbedPane.addTab("Leave Requests", createLeaveTab());
         tabbedPane.addTab("Routine Overview", createRoutineTab());
 
-        add(tabbedPane);
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.addActionListener(e -> {
+            dispose(); // Close the manager dashboard
+            new LoginFrame(); // Replace with your login screen class
+        });
+
+        // 🔲 Create a panel with BorderLayout to contain tabs and logout
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        mainPanel.add(logoutButton, BorderLayout.SOUTH); // Bottom
+
+        add(mainPanel);
         setVisible(true);
     }
 
