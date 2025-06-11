@@ -68,7 +68,8 @@ public class ManagerDashboard extends JFrame {
                     String block = p[4];
 
                     boolean working = isWithinTime(currentTimeStr, start, end) && day.equalsIgnoreCase(currentDay);
-                    model.addRow(new Object[] { empId, start, end, day, block, working ? "Working Now" : "Not Working" });
+                    model.addRow(
+                            new Object[] { empId, start, end, day, block, working ? "Working Now" : "Not Working" });
                 }
             }
         } catch (IOException e) {
@@ -250,6 +251,7 @@ public class ManagerDashboard extends JFrame {
             }
         }
     }
+
     private static class RoutineEditorDialog extends JDialog {
         public RoutineEditorDialog(JFrame parent, String empId) {
             super(parent, "Edit Routine", true);
@@ -257,17 +259,17 @@ public class ManagerDashboard extends JFrame {
             setSize(300, 250);
             setLocationRelativeTo(parent);
 
-            JTextField startTime = new JTextField();
-            JTextField endTime = new JTextField();
-            JTextField workDay = new JTextField();
-            JTextField block = new JTextField();
+            JTextField startTime = new JTextField(); // e.g., 08:00
+            JTextField endTime = new JTextField(); // e.g., 17:00
+            JTextField workDate = new JTextField(); // e.g., 2025/06/11
+            JTextField block = new JTextField(); // e.g., A, B, etc.
 
-            add(new JLabel("Start Time:"));
+            add(new JLabel("Start Time (HH:mm):"));
             add(startTime);
-            add(new JLabel("End Time:"));
+            add(new JLabel("End Time (HH:mm):"));
             add(endTime);
-            add(new JLabel("Work Day:"));
-            add(workDay);
+            add(new JLabel("Work Date (yyyy/MM/dd):"));
+            add(workDate);
             add(new JLabel("Block:"));
             add(block);
 
@@ -277,10 +279,27 @@ public class ManagerDashboard extends JFrame {
             add(cancelBtn);
 
             saveBtn.addActionListener(e -> {
-                String routine = empId + "|" + startTime.getText() + "|" + endTime.getText()
-                        + "|" + workDay.getText() + "|" + block.getText();
-                saveRoutine(empId, routine);
-                dispose();
+                try {
+                    // Parse date and get day name
+                    String dateInput = workDate.getText().trim();
+                    SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy/MM/dd");
+                    SimpleDateFormat storeFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date parsedDate = inputFormat.parse(dateInput);
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(parsedDate);
+                    String dayName = new DateFormatSymbols().getWeekdays()[calendar.get(Calendar.DAY_OF_WEEK)]
+                            .toUpperCase();
+
+                    String routineLine = empId + "|" + startTime.getText().trim() + "|" +
+                            endTime.getText().trim() + "|" + dayName + "|" +
+                            block.getText().trim() + "|" + storeFormat.format(parsedDate);
+
+                    saveRoutine(empId, routineLine);
+                    dispose();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid date format. Use yyyy/MM/dd.");
+                }
             });
 
             cancelBtn.addActionListener(e -> dispose());
@@ -291,24 +310,27 @@ public class ManagerDashboard extends JFrame {
             List<String> lines = new ArrayList<>();
             File file = new File("routines.txt");
 
+            boolean updated = false;
+
             if (file.exists()) {
                 try (BufferedReader br = new BufferedReader(new FileReader(file))) {
                     String line;
-                    boolean updated = false;
                     while ((line = br.readLine()) != null) {
-                        if (line.startsWith(empId + "|")) {
+                        if (line.startsWith(empId + "|") && line.split("\\|").length >= 6 &&
+                                line.split("\\|")[5].equals(routineLine.split("\\|")[5])) {
+                            // Replace routine for the same date
                             lines.add(routineLine);
                             updated = true;
                         } else {
                             lines.add(line);
                         }
                     }
-                    if (!updated)
-                        lines.add(routineLine);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
+            }
+
+            if (!updated) {
                 lines.add(routineLine);
             }
 
@@ -340,23 +362,40 @@ public class ManagerDashboard extends JFrame {
                     if ((p.length == 6 || p.length == 5) && p[0].equals(empId)) {
                         String start = p[1];
                         String end = p[2];
-                        int numDays = Integer.parseInt(p[3]); // now used as number of days
                         String block = p[4];
+                        String dayOrNum = p[3];
+                        String startDate = p.length == 6 ? p[5] : null;
 
-                        Calendar calendar = Calendar.getInstance(); // today
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        Calendar calendar = Calendar.getInstance();
 
-                        for (int i = 0; i < numDays; i++) {
-                            String dayName = new DateFormatSymbols().getWeekdays()[calendar.get(Calendar.DAY_OF_WEEK)]
-                                    .toUpperCase();
+                        try {
+                            if (startDate != null) {
+                                calendar.setTime(sdf.parse(startDate));
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (dayOrNum.matches("\\d+")) {
+                            int numDays = Integer.parseInt(dayOrNum);
+                            for (int i = 0; i < numDays; i++) {
+                                String dayName = new DateFormatSymbols().getWeekdays()[calendar
+                                        .get(Calendar.DAY_OF_WEEK)].toUpperCase();
+                                String dateStr = sdf.format(calendar.getTime());
+
+                                routineArea.append(String.format("%s (%s): Duty at Block %s from %s to %s\n",
+                                        dayName, dateStr, block, start, end));
+
+                                calendar.add(Calendar.DAY_OF_YEAR, 1);
+                            }
+                        } else {
                             String dateStr = sdf.format(calendar.getTime());
-
                             routineArea.append(String.format("%s (%s): Duty at Block %s from %s to %s\n",
-                                    dayName, dateStr, block, start, end));
-
-                            calendar.add(Calendar.DAY_OF_YEAR, 1); // go to next day
+                                    dayOrNum, dateStr, block, start, end));
                         }
                     }
+
                 }
 
             } catch (IOException e) {
@@ -445,4 +484,4 @@ public class ManagerDashboard extends JFrame {
 
     }
 
-} 
+}
