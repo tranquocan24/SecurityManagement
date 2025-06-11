@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Employee {
+public class Employee implements Profile{
     private String id;
     private String fullName;
     private String password;
@@ -27,10 +27,9 @@ public class Employee {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] p = line.split("\\|");
-                if (p[0].equals(id) ) {
+                if (p[0].equals(id)) {
                     totalDays += 1;
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -40,20 +39,60 @@ public class Employee {
         int baseSalary = workedDays * 100000;
         int extraLeaves = Math.max(0, leavesTaken - 4);
         int fine = extraLeaves * 10000;
-        return baseSalary - fine;
+        int finalSalary = baseSalary - fine;
+
+        // Update this employee's line in employee.txt
+        updateEmployeeFileWithSalary(finalSalary);
+
+        return finalSalary;
     }
 
-    public String toFileString() {
-        return String.join("|", id, fullName, password, gender,
-                String.valueOf(leavesTaken), workLocation, String.valueOf(calculateSalary()));
+    public void updateEmployeeFileWithSalary(int salary) {
+        StringBuilder updatedContent = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader("employees.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\\|");
+                if (parts.length >= 6 && parts[0].equals(this.id)) {
+                    // Replace this employee's line with updated salary
+                    updatedContent.append(String.join("|", id, fullName, password, gender,
+                            String.valueOf(leavesTaken), workLocation, String.valueOf(salary)));
+                } else {
+                    updatedContent.append(line);
+                }
+                updatedContent.append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Write updated content back to the file
+        try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter("employees.txt"))) {
+            bw.write(updatedContent.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    
+
+    @Override
     public String getId() {
+        // TODO Auto-generated method stub
         return id;
     }
 
+    @Override
     public String getPassword() {
+        // TODO Auto-generated method stub
         return password;
+    }
+
+    @Override
+    public String toFileString() {
+        // TODO Auto-generated method stub
+        return String.join("|", id, fullName, password, gender,
+                String.valueOf(leavesTaken), workLocation, String.valueOf(calculateSalary()));
     }
 
     public String getFullName() {

@@ -1,11 +1,9 @@
 package ui;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
-import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -22,7 +20,6 @@ public class ManagerDashboard extends JFrame {
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Employee Info", createEmployeeTab());
         tabbedPane.addTab("Leave Requests", createLeaveTab());
-        tabbedPane.addTab("Routine Overview", createRoutineTab());
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
@@ -31,75 +28,11 @@ public class ManagerDashboard extends JFrame {
         setVisible(true);
     }
 
-    private JPanel createRoutineTab() {
-        JPanel panel = new JPanel(new BorderLayout());
-
-        DefaultTableModel model = new DefaultTableModel(new String[] {
-                "Employee ID", "Start Time", "End Time", "Day", "Block", "Status"
-        }, 0);
-
-        JTable routineTable = new JTable(model);
-        updateRoutineTable(model);
-
-        Timer timer = new Timer(30000, e -> updateRoutineTable(model));
-        timer.start();
-
-        JButton exitBtn = new JButton("Log Out");
-        exitBtn.addActionListener(e -> {
-            dispose();
-            new LoginFrame();
-        });
-
-        panel.add(new JScrollPane(routineTable), BorderLayout.CENTER);
-        panel.add(exitBtn, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private void updateRoutineTable(DefaultTableModel model) {
-        model.setRowCount(0);
-
-        String currentDay = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(new Date());
-        String currentTimeStr = new SimpleDateFormat("HH:mm").format(new Date());
-
-        try (BufferedReader br = new BufferedReader(new FileReader("routines.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] p = line.split("\\|");
-                if (p.length == 5) {
-                    String empId = p[0];
-                    String start = p[1];
-                    String end = p[2];
-                    String day = p[3];
-                    String block = p[4];
-
-                    boolean working = isWithinTime(currentTimeStr, start, end) && day.equalsIgnoreCase(currentDay);
-                    model.addRow(
-                            new Object[] { empId, start, end, day, block, working ? "Working Now" : "Not Working" });
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean isWithinTime(String now, String start, String end) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-            Date nowTime = format.parse(now);
-            Date startTime = format.parse(start);
-            Date endTime = format.parse(end);
-            return nowTime.compareTo(startTime) >= 0 && nowTime.compareTo(endTime) <= 0;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     private JPanel createEmployeeTab() {
         JPanel panel = new JPanel(new BorderLayout());
 
         DefaultTableModel empModel = new DefaultTableModel(
-                new String[] { "ID", "Name", "Gender", "Leaves", "Work Location" }, 0);
+                new String[] { "ID", "Name", "Gender", "Leaves", "Work Location", "Salary" }, 0);
         JTable empTable = new JTable(empModel);
         loadEmployees(empModel);
 
@@ -114,7 +47,6 @@ public class ManagerDashboard extends JFrame {
         JButton reloadBtn = new JButton("reload");
         reloadBtn.addActionListener(e -> {
             loadEmployees(empModel);
-
         });
         panel.add(reloadBtn, BorderLayout.EAST);
         editRoutineBtn.addActionListener(e -> {
@@ -149,14 +81,13 @@ public class ManagerDashboard extends JFrame {
 
     private void loadEmployees(DefaultTableModel model) {
 
-        
         try (BufferedReader br = new BufferedReader(new FileReader("employees.txt"))) {
             String line;
             model.setRowCount(0);
             while ((line = br.readLine()) != null) {
                 String[] p = line.split("\\|");
-                if (p.length >= 6)
-                    model.addRow(new Object[] { p[0], p[1], p[3], p[4], p[5] });
+                if (p.length >= 7)
+                    model.addRow(new Object[] { p[0], p[1], p[3], p[4], p[5], p[6] }); // p[6] is salary
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -333,7 +264,7 @@ public class ManagerDashboard extends JFrame {
 
             saveBtn.addActionListener(e -> {
                 try {
-                    // Parse date and get day name
+                    // Parse the date
                     String dateInput = workDate.getText().trim();
                     SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy/MM/dd");
                     SimpleDateFormat storeFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -344,14 +275,65 @@ public class ManagerDashboard extends JFrame {
                     String dayName = new DateFormatSymbols().getWeekdays()[calendar.get(Calendar.DAY_OF_WEEK)]
                             .toUpperCase();
 
-                    String routineLine = empId + "|" + startTime.getText().trim() + "|" +
-                            endTime.getText().trim() + "|" + dayName + "|" +
-                            block.getText().trim() + "|" + storeFormat.format(parsedDate);
+                    String newDateStr = storeFormat.format(parsedDate);
+                    String newBlock = block.getText().trim();
+                    String newStart = startTime.getText().trim();
+                    String newEnd = endTime.getText().trim();
 
+                    SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                    Date newStartTime = timeFormat.parse(newStart);
+                    Date newEndTime = timeFormat.parse(newEnd);
+
+                    // Check for block or time conflicts
+                    try (BufferedReader br = new BufferedReader(new FileReader("routines.txt"))) {
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            String[] p = line.split("\\|");
+                            if (p.length >= 6) {
+                                String existingStart = p[1];
+                                String existingEnd = p[2];
+                                String existingBlock = p[4];
+                                String existingDate = p[5];
+
+                                if (existingDate.equals(newDateStr)) {
+                                    // Same block used on the same day
+                                    if (existingBlock.equalsIgnoreCase(newBlock)) {
+                                        JOptionPane.showMessageDialog(this,
+                                                "Block '" + newBlock + "' is already assigned to another employee on "
+                                                        + newDateStr + ".",
+                                                "Block Conflict",
+                                                JOptionPane.WARNING_MESSAGE);
+                                        return;
+                                    }
+
+                                    // Time overlap
+                                    Date existingStartTime = timeFormat.parse(existingStart);
+                                    Date existingEndTime = timeFormat.parse(existingEnd);
+
+                                    boolean timeOverlaps = newStartTime.before(existingEndTime)
+                                            && newEndTime.after(existingStartTime);
+                                    if (timeOverlaps) {
+                                        JOptionPane.showMessageDialog(this,
+                                                "Another employee already has a duty on " + newDateStr + " from "
+                                                        + existingStart + " to " + existingEnd + ".",
+                                                "Time Conflict",
+                                                JOptionPane.WARNING_MESSAGE);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    // Save routine
+                    String routineLine = empId + "|" + newStart + "|" + newEnd + "|" + dayName + "|" + newBlock + "|"
+                            + newDateStr;
                     saveRoutine(empId, routineLine);
                     dispose();
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Invalid date format. Use yyyy/MM/dd.");
+                    JOptionPane.showMessageDialog(this, "Invalid input: please check time or date format.");
                 }
             });
 
@@ -466,75 +448,6 @@ public class ManagerDashboard extends JFrame {
 
             setVisible(true);
         }
-
-        private int getDayIndex(String day) {
-            switch (day) {
-                case "SUNDAY":
-                    return Calendar.SUNDAY;
-                case "MONDAY":
-                    return Calendar.MONDAY;
-                case "TUESDAY":
-                    return Calendar.TUESDAY;
-                case "WEDNESDAY":
-                    return Calendar.WEDNESDAY;
-                case "THURSDAY":
-                    return Calendar.THURSDAY;
-                case "FRIDAY":
-                    return Calendar.FRIDAY;
-                case "SATURDAY":
-                    return Calendar.SATURDAY;
-                default:
-                    return -1;
-            }
-        }
-
-        private static void addRoutine(String empId, String start, String end, int numDays, String block) {
-            String filename = "routines.txt";
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            Calendar calendar = Calendar.getInstance();
-
-            // Step 1: Find latest routine date for this empId
-            Date latestDate = null;
-            try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] p = line.split("\\|");
-                    if (p.length == 6 && p[0].equals(empId)) {
-                        Date date = sdf.parse(p[5]);
-                        if (latestDate == null || date.after(latestDate)) {
-                            latestDate = date;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // Step 2: Set start date to tomorrow or day after last date
-            if (latestDate != null) {
-                calendar.setTime(latestDate);
-                calendar.add(Calendar.DAY_OF_YEAR, 1); // next day
-            }
-
-            // Step 3: Append new routine
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename, true))) {
-                for (int i = 0; i < numDays; i++) {
-                    String dateStr = sdf.format(calendar.getTime());
-                    writer.write(String.format("%s|%s|%s|%s|%s|%s\n",
-                            empId, start, end,
-                            getDayName(calendar.get(Calendar.DAY_OF_WEEK)),
-                            block, dateStr));
-                    calendar.add(Calendar.DAY_OF_YEAR, 1);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private static String getDayName(int dayOfWeek) {
-            return new DateFormatSymbols().getWeekdays()[dayOfWeek].toUpperCase();
-        }
-
     }
 
 }

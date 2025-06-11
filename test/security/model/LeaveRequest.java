@@ -20,8 +20,19 @@ public class LeaveRequest {
         return employeeId + "|" + date + "|" + status;
     }
 
-    public String getEmployeeId() { return employeeId; }
-    public String getDate() { return date; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

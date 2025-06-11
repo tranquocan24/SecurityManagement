@@ -41,9 +41,16 @@ public class LoginFrame extends JFrame {
         JTextField genderField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
         JTextField locationField = new JTextField();
+        JTextField salaryField = new JTextField();
 
-        Object[] fields = {"ID:", idField, "Full Name:", nameField, "Gender:", genderField,
-                "Password:", passwordField, "Work Location (Block 1-10):", locationField};
+        Object[] fields = {
+                "ID:", idField,
+                "Full Name:", nameField,
+                "Gender:", genderField,
+                "Password:", passwordField,
+                "Work Location (Block 1-10):", locationField,
+                "Salary:", salaryField
+        };
         int option = JOptionPane.showConfirmDialog(this, fields, "Register Employee", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             Employee emp = new Employee(idField.getText(), nameField.getText(), new String(passwordField.getPassword()),
@@ -65,10 +72,12 @@ public class LoginFrame extends JFrame {
         JTextField genderField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
 
-        Object[] fields = {"ID:", idField, "Full Name:", nameField, "Gender:", genderField, "Password:", passwordField};
+        Object[] fields = { "ID:", idField, "Full Name:", nameField, "Gender:", genderField, "Password:",
+                passwordField };
         int option = JOptionPane.showConfirmDialog(this, fields, "Register Manager", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            Manager manager = new Manager(idField.getText(), nameField.getText(), new String(passwordField.getPassword()), genderField.getText());
+            Manager manager = new Manager(idField.getText(), nameField.getText(),
+                    new String(passwordField.getPassword()), genderField.getText());
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(MANAGER_FILE, true))) {
                 bw.write(manager.toFileString());
                 bw.newLine();
@@ -83,15 +92,17 @@ public class LoginFrame extends JFrame {
     private void loginEmployee() {
         JTextField idField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
-        Object[] fields = {"ID:", idField, "Password:", passwordField};
+        Object[] fields = { "ID:", idField, "Password:", passwordField };
         int option = JOptionPane.showConfirmDialog(this, fields, "Employee Login", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             try (BufferedReader br = new BufferedReader(new FileReader(EMPLOYEE_FILE))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("\\|");
-                    if (parts.length >= 3 && parts[0].equals(idField.getText()) && parts[2].equals(new String(passwordField.getPassword()))) {
-                        Employee employee = new Employee(parts[0], parts[1], parts[2], parts[3], Integer.parseInt(parts[4]), parts[5]);
+                    if (parts.length >= 3 && parts[0].equals(idField.getText())
+                            && parts[2].equals(new String(passwordField.getPassword()))) {
+                        Employee employee = new Employee(parts[0], parts[1], parts[2], parts[3],
+                                Integer.parseInt(parts[4]), parts[5]);
                         new EmployeeDashboard(employee);
                         dispose();
                         return;
@@ -107,7 +118,7 @@ public class LoginFrame extends JFrame {
     private void loginManager() {
         JTextField idField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
-        Object[] fields = {"ID:", idField, "Password:", passwordField};
+        Object[] fields = { "ID:", idField, "Password:", passwordField };
         int option = JOptionPane.showConfirmDialog(this, fields, "Manager Login", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             try (BufferedReader br = new BufferedReader(new FileReader(MANAGER_FILE))) {
@@ -115,14 +126,16 @@ public class LoginFrame extends JFrame {
                 boolean found = false;
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("\\|");
-                    if (parts.length >= 3 && parts[0].equals(idField.getText()) && parts[2].equals(new String(passwordField.getPassword()))) {
+                    if (parts.length >= 3 && parts[0].equals(idField.getText())
+                            && parts[2].equals(new String(passwordField.getPassword()))) {
                         found = true;
                         new ManagerDashboard();
                         dispose();
                         break;
                     }
                 }
-                if (!found) JOptionPane.showMessageDialog(this, "Invalid credentials");
+                if (!found)
+                    JOptionPane.showMessageDialog(this, "Invalid credentials");
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
