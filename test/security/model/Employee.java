@@ -1,5 +1,9 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class Employee {
     private String id;
     private String fullName;
@@ -18,9 +22,22 @@ public class Employee {
     }
 
     public int calculateSalary() {
-        int totalDays = 30;
-        int workedDays = totalDays - leavesTaken;
-        int baseSalary = workedDays * 45000;
+        int totalDays = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader("routines.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] p = line.split("\\|");
+                if (p[0].equals(id) ) {
+                    totalDays += 1;
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int workedDays = totalDays;
+        int baseSalary = workedDays * 100000;
         int extraLeaves = Math.max(0, leavesTaken - 4);
         int fine = extraLeaves * 10000;
         return baseSalary - fine;
@@ -28,13 +45,30 @@ public class Employee {
 
     public String toFileString() {
         return String.join("|", id, fullName, password, gender,
-            String.valueOf(leavesTaken), workLocation, String.valueOf(calculateSalary()));
+                String.valueOf(leavesTaken), workLocation, String.valueOf(calculateSalary()));
     }
 
-    public String getId() { return id; }
-    public String getPassword() { return password; }
-    public String getFullName() { return fullName; }
-    public String getGender() { return gender; }
-    public int getLeavesTaken() { return leavesTaken; }
-    public String getWorkLocation() { return workLocation; }
+    public String getId() {
+        return id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public int getLeavesTaken() {
+        return leavesTaken;
+    }
+
+    public String getWorkLocation() {
+        return workLocation;
+    }
 }
