@@ -65,22 +65,32 @@ public class LoginFrame extends JFrame {
     }
 
     private void registerEmployee() {
-        JTextField idField = new JTextField();
-        JTextField nameField = new JTextField();
-        JTextField genderField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        JTextField locationField = new JTextField();
-        JTextField salaryField = new JTextField();
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        Object[] fields = {
-                "ID:", idField,
-                "Full Name:", nameField,
-                "Gender:", genderField,
-                "Password:", passwordField,
-                "Work Location (Block 1-10):", locationField,
-                "Salary:", salaryField
-        };
-        int option = JOptionPane.showConfirmDialog(this, fields, "Register Employee", JOptionPane.OK_CANCEL_OPTION);
+        JTextField idField = new JTextField(15);
+        JTextField nameField = new JTextField(15);
+        JTextField genderField = new JTextField(15);
+        JPasswordField passwordField = new JPasswordField(15);
+        JTextField locationField = new JTextField(15);
+        JTextField salaryField = new JTextField(15);
+
+        String[] labels = { "ID:", "Full Name:", "Gender:", "Password:", "Work Location (Block 1-10):", "Salary:" };
+        JTextField[] fields = { idField, nameField, genderField, passwordField, locationField, salaryField };
+
+        for (int i = 0; i < labels.length; i++) {
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            panel.add(new JLabel(labels[i]), gbc);
+            gbc.gridx = 1;
+            panel.add(fields[i], gbc);
+        }
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Register Employee", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             Employee emp = new Employee(idField.getText(), nameField.getText(), new String(passwordField.getPassword()),
                     genderField.getText(), 0, locationField.getText());
@@ -96,13 +106,30 @@ public class LoginFrame extends JFrame {
     }
 
     private void registerManager() {
-        JTextField idField = new JTextField();
-        JTextField nameField = new JTextField();
-        JTextField genderField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
-        Object[] fields = { "ID:", idField, "Full Name:", nameField, "Gender:", genderField, "Password:", passwordField };
-        int option = JOptionPane.showConfirmDialog(this, fields, "Register Manager", JOptionPane.OK_CANCEL_OPTION);
+        JTextField idField = new JTextField(15);
+        JTextField nameField = new JTextField(15);
+        JTextField genderField = new JTextField(15);
+        JPasswordField passwordField = new JPasswordField(15);
+
+        String[] labels = { "ID:", "Full Name:", "Gender:", "Password:" };
+        JTextField[] fields = { idField, nameField, genderField, passwordField };
+
+        for (int i = 0; i < labels.length; i++) {
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            panel.add(new JLabel(labels[i]), gbc);
+            gbc.gridx = 1;
+            panel.add(fields[i], gbc);
+        }
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Register Manager", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             Manager manager = new Manager(idField.getText(), nameField.getText(),
                     new String(passwordField.getPassword()), genderField.getText());
@@ -118,10 +145,29 @@ public class LoginFrame extends JFrame {
     }
 
     private void loginEmployee() {
-        JTextField idField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        Object[] fields = { "ID:", idField, "Password:", passwordField };
-        int option = JOptionPane.showConfirmDialog(this, fields, "Employee Login", JOptionPane.OK_CANCEL_OPTION);
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        JTextField idField = new JTextField(15);
+        JPasswordField passwordField = new JPasswordField(15);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("ID:"), gbc);
+        gbc.gridx = 1;
+        panel.add(idField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        panel.add(passwordField, gbc);
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Employee Login", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             try (BufferedReader br = new BufferedReader(new FileReader(EMPLOYEE_FILE))) {
                 String line;
@@ -136,7 +182,7 @@ public class LoginFrame extends JFrame {
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(this, "Invalid credentials");
+                JOptionPane.showMessageDialog(this, "Invalid credentials", "Login Failed", JOptionPane.ERROR_MESSAGE);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -144,29 +190,46 @@ public class LoginFrame extends JFrame {
     }
 
     private void loginManager() {
-        JTextField idField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        Object[] fields = { "ID:", idField, "Password:", passwordField };
-        int option = JOptionPane.showConfirmDialog(this, fields, "Manager Login", JOptionPane.OK_CANCEL_OPTION);
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        JTextField idField = new JTextField(15);
+        JPasswordField passwordField = new JPasswordField(15);
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("ID:"), gbc);
+        gbc.gridx = 1;
+        panel.add(idField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        panel.add(passwordField, gbc);
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Manager Login", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
             try (BufferedReader br = new BufferedReader(new FileReader(MANAGER_FILE))) {
                 String line;
-                boolean found = false;
                 while ((line = br.readLine()) != null) {
                     String[] parts = line.split("\\|");
                     if (parts.length >= 3 && parts[0].equals(idField.getText())
                             && parts[2].equals(new String(passwordField.getPassword()))) {
-                        found = true;
                         new ManagerDashboard();
                         dispose();
-                        break;
+                        return;
                     }
                 }
-                if (!found)
-                    JOptionPane.showMessageDialog(this, "Invalid credentials");
+                JOptionPane.showMessageDialog(this, "Invalid credentials", "Login Failed", JOptionPane.ERROR_MESSAGE);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
     }
+
 }

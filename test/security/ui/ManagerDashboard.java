@@ -35,7 +35,7 @@ public class ManagerDashboard extends JFrame {
         btn.setForeground(Color.WHITE);
         btn.setBackground(bgColor);
         btn.setFocusPainted(false);
-        btn.setPreferredSize(new Dimension(110, 36));
+        btn.setPreferredSize(new Dimension(150, 36));
     }
 
     private JPanel createEmployeeTab() {
