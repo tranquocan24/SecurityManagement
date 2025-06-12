@@ -1,6 +1,8 @@
 package ui;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
@@ -28,34 +30,50 @@ public class ManagerDashboard extends JFrame {
         setVisible(true);
     }
 
+    private void styleButton(JButton btn, Color bgColor) {
+        btn.setFont(new Font("SansSerif", Font.BOLD, 12));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(bgColor);
+        btn.setFocusPainted(false);
+        btn.setPreferredSize(new Dimension(150, 36));
+    }
+
     private JPanel createEmployeeTab() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         DefaultTableModel empModel = new DefaultTableModel(
                 new String[] { "ID", "Name", "Gender", "Leaves", "Work Location", "Salary" }, 0);
         JTable empTable = new JTable(empModel);
+        empTable.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        empTable.setRowHeight(24);
+        empTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
+
         loadEmployees(empModel);
 
         JButton editRoutineBtn = new JButton("Edit Routine");
-        JButton exitBtn = new JButton("Log Out");
         JButton viewRoutineBtn = new JButton("View Routine");
+        JButton reloadBtn = new JButton("Reload");
+        JButton exitBtn = new JButton("Logout");
 
-        JPanel bottom = new JPanel();
-        bottom.add(editRoutineBtn);
-        bottom.add(exitBtn);
-        bottom.add(viewRoutineBtn);
-        JButton reloadBtn = new JButton("reload");
-        reloadBtn.addActionListener(e -> {
-            loadEmployees(empModel);
-        });
-        panel.add(reloadBtn, BorderLayout.EAST);
+        styleButton(editRoutineBtn, new Color(0, 123, 255)); // blue
+        styleButton(viewRoutineBtn, new Color(40, 167, 69)); // green
+        styleButton(reloadBtn, new Color(255, 193, 7)); // yellow
+        styleButton(exitBtn, new Color(220, 53, 69)); // red
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        buttonPanel.add(editRoutineBtn);
+        buttonPanel.add(viewRoutineBtn);
+        buttonPanel.add(reloadBtn);
+        buttonPanel.add(exitBtn);
+
         editRoutineBtn.addActionListener(e -> {
             int selectedRow = empTable.getSelectedRow();
             if (selectedRow >= 0) {
                 String empId = (String) empModel.getValueAt(selectedRow, 0);
                 new RoutineEditorDialog(this, empId);
             } else {
-                JOptionPane.showMessageDialog(this, "Select an employee to edit routine.");
+                JOptionPane.showMessageDialog(this, "Please select an employee to edit routine.");
             }
         });
 
@@ -65,17 +83,19 @@ public class ManagerDashboard extends JFrame {
                 String empId = (String) empModel.getValueAt(selectedRow, 0);
                 new RoutineViewerDialog(this, empId);
             } else {
-                JOptionPane.showMessageDialog(this, "Select an employee to view routine.");
+                JOptionPane.showMessageDialog(this, "Please select an employee to view routine.");
             }
         });
 
+        reloadBtn.addActionListener(e -> loadEmployees(empModel));
         exitBtn.addActionListener(e -> {
             dispose();
             new LoginFrame();
         });
 
         panel.add(new JScrollPane(empTable), BorderLayout.CENTER);
-        panel.add(bottom, BorderLayout.SOUTH);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
         return panel;
     }
 
@@ -95,20 +115,24 @@ public class ManagerDashboard extends JFrame {
     }
 
     private JPanel createLeaveTab() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         DefaultTableModel leaveModel = new DefaultTableModel(new String[] { "Employee ID", "Date", "Status" }, 0);
         JTable leaveTable = new JTable(leaveModel);
+        leaveTable.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        leaveTable.setRowHeight(24);
+        leaveTable.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 13));
+
         loadLeaveRequests(leaveModel);
 
         JButton approveBtn = new JButton("Approve");
         JButton declineBtn = new JButton("Decline");
-        JButton exitBtn = new JButton("Log Out");
+        JButton exitBtn = new JButton("Logout");
 
-        JPanel btnPanel = new JPanel();
-        btnPanel.add(approveBtn);
-        btnPanel.add(declineBtn);
-        btnPanel.add(exitBtn);
+        styleButton(approveBtn, new Color(40, 167, 69)); // green
+        styleButton(declineBtn, new Color(255, 193, 7)); // yellow
+        styleButton(exitBtn, new Color(220, 53, 69)); // red
 
         approveBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Approved"));
         declineBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Declined"));
@@ -117,6 +141,11 @@ public class ManagerDashboard extends JFrame {
             dispose();
             new LoginFrame();
         });
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        btnPanel.add(approveBtn);
+        btnPanel.add(declineBtn);
+        btnPanel.add(exitBtn);
 
         panel.add(new JScrollPane(leaveTable), BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
@@ -238,33 +267,71 @@ public class ManagerDashboard extends JFrame {
 
     private static class RoutineEditorDialog extends JDialog {
         public RoutineEditorDialog(JFrame parent, String empId) {
-            super(parent, "Edit Routine", true);
-            setLayout(new GridLayout(5, 2, 5, 5));
-            setSize(300, 250);
+            super(parent, "Edit Routine for Employee ID: " + empId, true);
+            setSize(400, 300);
             setLocationRelativeTo(parent);
+            setLayout(new BorderLayout(10, 10));
 
-            JTextField startTime = new JTextField(); // e.g., 08:00
-            JTextField endTime = new JTextField(); // e.g., 17:00
-            JTextField workDate = new JTextField(); // e.g., 2025/06/11
-            JTextField block = new JTextField(); // e.g., A, B, etc.
+            // Title
+            JLabel title = new JLabel("Routine Details");
+            title.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            titlePanel.add(title);
+            add(titlePanel, BorderLayout.NORTH);
 
-            add(new JLabel("Start Time (HH:mm):"));
-            add(startTime);
-            add(new JLabel("End Time (HH:mm):"));
-            add(endTime);
-            add(new JLabel("Work Date (yyyy/MM/dd):"));
-            add(workDate);
-            add(new JLabel("Block:"));
-            add(block);
+            // Form panel
+            JPanel formPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(8, 8, 8, 8);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
 
+            JTextField startTime = new JTextField();
+            JTextField endTime = new JTextField();
+            JTextField workDate = new JTextField();
+            JTextField block = new JTextField();
+
+            JLabel[] labels = {
+                    new JLabel("Start Time (HH:mm):"),
+                    new JLabel("End Time (HH:mm):"),
+                    new JLabel("Work Date (yyyy/MM/dd):"),
+                    new JLabel("Block:")
+            };
+
+            JTextField[] fields = { startTime, endTime, workDate, block };
+
+            for (int i = 0; i < labels.length; i++) {
+                labels[i].setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                gbc.gridx = 0;
+                gbc.gridy = i;
+                gbc.weightx = 0.3;
+                formPanel.add(labels[i], gbc);
+
+                fields[i].setPreferredSize(new Dimension(200, 25));
+                fields[i].setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                gbc.gridx = 1;
+                gbc.weightx = 0.7;
+                formPanel.add(fields[i], gbc);
+            }
+
+            add(formPanel, BorderLayout.CENTER);
+
+            // Buttons
+            JPanel buttonPanel = new JPanel();
             JButton saveBtn = new JButton("Save");
-            JButton cancelBtn = new JButton("Cancel");
-            add(saveBtn);
-            add(cancelBtn);
+            saveBtn.setBackground(new Color(0, 120, 215));
+            saveBtn.setForeground(Color.WHITE);
 
+            JButton cancelBtn = new JButton("Cancel");
+            cancelBtn.setBackground(Color.RED);
+            cancelBtn.setForeground(Color.WHITE);
+
+            buttonPanel.add(saveBtn);
+            buttonPanel.add(cancelBtn);
+            add(buttonPanel, BorderLayout.SOUTH);
+
+            // === Event Logic (Giữ nguyên logic cũ) ===
             saveBtn.addActionListener(e -> {
                 try {
-                    // Parse the date
                     String dateInput = workDate.getText().trim();
                     SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy/MM/dd");
                     SimpleDateFormat storeFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -284,7 +351,6 @@ public class ManagerDashboard extends JFrame {
                     Date newStartTime = timeFormat.parse(newStart);
                     Date newEndTime = timeFormat.parse(newEnd);
 
-                    // Check for block or time conflicts
                     try (BufferedReader br = new BufferedReader(new FileReader("routines.txt"))) {
                         String line;
                         while ((line = br.readLine()) != null) {
@@ -296,17 +362,14 @@ public class ManagerDashboard extends JFrame {
                                 String existingDate = p[5];
 
                                 if (existingDate.equals(newDateStr)) {
-                                    // Same block used on the same day
                                     if (existingBlock.equalsIgnoreCase(newBlock)) {
                                         JOptionPane.showMessageDialog(this,
-                                                "Block '" + newBlock + "' is already assigned to another employee on "
-                                                        + newDateStr + ".",
+                                                "Block '" + newBlock + "' is already assigned on " + newDateStr + ".",
                                                 "Block Conflict",
                                                 JOptionPane.WARNING_MESSAGE);
                                         return;
                                     }
 
-                                    // Time overlap
                                     Date existingStartTime = timeFormat.parse(existingStart);
                                     Date existingEndTime = timeFormat.parse(existingEnd);
 
@@ -314,8 +377,7 @@ public class ManagerDashboard extends JFrame {
                                             && newEndTime.after(existingStartTime);
                                     if (timeOverlaps) {
                                         JOptionPane.showMessageDialog(this,
-                                                "Another employee already has a duty on " + newDateStr + " from "
-                                                        + existingStart + " to " + existingEnd + ".",
+                                                "Time conflict with another routine on " + newDateStr + ".",
                                                 "Time Conflict",
                                                 JOptionPane.WARNING_MESSAGE);
                                         return;
@@ -327,7 +389,6 @@ public class ManagerDashboard extends JFrame {
                         ex.printStackTrace();
                     }
 
-                    // Save routine
                     String routineLine = empId + "|" + newStart + "|" + newEnd + "|" + dayName + "|" + newBlock + "|"
                             + newDateStr;
                     saveRoutine(empId, routineLine);
@@ -338,6 +399,7 @@ public class ManagerDashboard extends JFrame {
             });
 
             cancelBtn.addActionListener(e -> dispose());
+
             setVisible(true);
         }
 
@@ -353,7 +415,6 @@ public class ManagerDashboard extends JFrame {
                     while ((line = br.readLine()) != null) {
                         if (line.startsWith(empId + "|") && line.split("\\|").length >= 6 &&
                                 line.split("\\|")[5].equals(routineLine.split("\\|")[5])) {
-                            // Replace routine for the same date
                             lines.add(routineLine);
                             updated = true;
                         } else {
@@ -383,12 +444,31 @@ public class ManagerDashboard extends JFrame {
     private static class RoutineViewerDialog extends JDialog {
         public RoutineViewerDialog(JFrame parent, String empId) {
             super(parent, "View Routine for " + empId, true);
-            setSize(500, 400);
+            setSize(600, 450);
             setLocationRelativeTo(parent);
-            setLayout(new BorderLayout());
+            setLayout(new BorderLayout(10, 10)); // spacing between components
+            getContentPane().setBackground(Color.WHITE); // background color
 
+            // Title Label
+            JLabel title = new JLabel("Routine Schedule for Employee ID: " + empId);
+            title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            title.setHorizontalAlignment(SwingConstants.CENTER);
+            title.setBorder(new EmptyBorder(10, 0, 10, 0));
+            add(title, BorderLayout.NORTH);
+
+            // Text Area with scroll
             JTextArea routineArea = new JTextArea();
             routineArea.setEditable(false);
+            routineArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+            routineArea.setMargin(new Insets(10, 10, 10, 10));
+            routineArea.setBackground(new Color(245, 245, 245));
+            routineArea.setBorder(BorderFactory.createTitledBorder(
+                    BorderFactory.createLineBorder(Color.GRAY, 1),
+                    "Routine Details",
+                    TitledBorder.LEFT,
+                    TitledBorder.TOP,
+                    new Font("Segoe UI", Font.BOLD, 14),
+                    Color.DARK_GRAY));
 
             try (BufferedReader br = new BufferedReader(new FileReader("routines.txt"))) {
                 String line;
@@ -416,33 +496,40 @@ public class ManagerDashboard extends JFrame {
                             int numDays = Integer.parseInt(dayOrNum);
                             for (int i = 0; i < numDays; i++) {
                                 String dayName = new DateFormatSymbols().getWeekdays()[calendar
-                                        .get(Calendar.DAY_OF_WEEK)].toUpperCase();
+                                        .get(Calendar.DAY_OF_WEEK)];
                                 String dateStr = sdf.format(calendar.getTime());
 
-                                routineArea.append(String.format("%s (%s): Duty at Block %s from %s to %s\n",
+                                routineArea.append(String.format("• %s (%s): Block %s, %s - %s\n",
                                         dayName, dateStr, block, start, end));
-
                                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                             }
                         } else {
+                            String dayName = dayOrNum;
                             String dateStr = sdf.format(calendar.getTime());
-                            routineArea.append(String.format("%s (%s): Duty at Block %s from %s to %s\n",
-                                    dayOrNum, dateStr, block, start, end));
+                            routineArea.append(String.format("• %s (%s): Block %s, %s - %s\n",
+                                    dayName, dateStr, block, start, end));
                         }
                     }
-
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            add(new JScrollPane(routineArea), BorderLayout.CENTER);
+            JScrollPane scrollPane = new JScrollPane(routineArea);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+            add(scrollPane, BorderLayout.CENTER);
 
+            // Close Button
             JButton closeBtn = new JButton("Close");
+            closeBtn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            closeBtn.setFocusPainted(false);
+            closeBtn.setBackground(new Color(220, 53, 69));
+            closeBtn.setForeground(Color.WHITE);
+            closeBtn.setPreferredSize(new Dimension(100, 35));
             closeBtn.addActionListener(e -> dispose());
 
-            JPanel bottom = new JPanel();
+            JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+            bottom.setBackground(Color.WHITE);
             bottom.add(closeBtn);
             add(bottom, BorderLayout.SOUTH);
 
