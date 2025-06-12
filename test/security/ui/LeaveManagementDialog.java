@@ -17,7 +17,7 @@ public class LeaveManagementDialog extends JDialog {
         setSize(600, 300);
         setLocationRelativeTo(parent);
 
-        model = new DefaultTableModel(new String[]{"Employee ID", "Date", "Status"}, 0);
+        model = new DefaultTableModel(new String[] { "Employee ID", "Date", "Status" }, 0);
         JTable table = new JTable(model);
         loadLeaveRequests();
 
@@ -43,7 +43,7 @@ public class LeaveManagementDialog extends JDialog {
                 String[] parts = line.split("\\|");
                 if (parts.length >= 2) {
                     String status = parts.length == 3 ? parts[2] : "Pending";
-                    model.addRow(new Object[]{parts[0], parts[1], status});
+                    model.addRow(new Object[] { parts[0], parts[1], status });
                 }
             }
         } catch (IOException ex) {

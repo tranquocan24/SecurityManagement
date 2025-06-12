@@ -15,7 +15,6 @@ public class LoginFrame extends JFrame {
         setSize(450, 350);
         setLocationRelativeTo(null);
 
-        // Main panel
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -27,19 +26,16 @@ public class LoginFrame extends JFrame {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         mainPanel.add(titleLabel);
 
-        // Buttons
         JButton registerEmployeeBtn = createStyledButton("Register as Employee");
         JButton registerManagerBtn = createStyledButton("Register as Manager");
         JButton loginEmployeeBtn = createStyledButton("Login as Employee");
         JButton loginManagerBtn = createStyledButton("Login as Manager");
 
-        // Add action listeners
         registerEmployeeBtn.addActionListener(e -> registerEmployee());
         registerManagerBtn.addActionListener(e -> registerManager());
         loginEmployeeBtn.addActionListener(e -> loginEmployee());
         loginManagerBtn.addActionListener(e -> loginManager());
 
-        // Add buttons to panel
         mainPanel.add(registerEmployeeBtn);
         mainPanel.add(Box.createVerticalStrut(10));
         mainPanel.add(registerManagerBtn);

@@ -56,10 +56,10 @@ public class ManagerDashboard extends JFrame {
         JButton reloadBtn = new JButton("Reload");
         JButton exitBtn = new JButton("Logout");
 
-        styleButton(editRoutineBtn, new Color(0, 123, 255)); // blue
-        styleButton(viewRoutineBtn, new Color(40, 167, 69)); // green
-        styleButton(reloadBtn, new Color(255, 193, 7)); // yellow
-        styleButton(exitBtn, new Color(220, 53, 69)); // red
+        styleButton(editRoutineBtn, new Color(0, 123, 255));
+        styleButton(viewRoutineBtn, new Color(40, 167, 69));
+        styleButton(reloadBtn, new Color(255, 193, 7));
+        styleButton(exitBtn, new Color(220, 53, 69));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         buttonPanel.add(editRoutineBtn);
@@ -107,7 +107,7 @@ public class ManagerDashboard extends JFrame {
             while ((line = br.readLine()) != null) {
                 String[] p = line.split("\\|");
                 if (p.length >= 7)
-                    model.addRow(new Object[] { p[0], p[1], p[3], p[4], p[5], p[6] }); // p[6] is salary
+                    model.addRow(new Object[] { p[0], p[1], p[3], p[4], p[5], p[6] });
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,9 +130,9 @@ public class ManagerDashboard extends JFrame {
         JButton declineBtn = new JButton("Decline");
         JButton exitBtn = new JButton("Logout");
 
-        styleButton(approveBtn, new Color(40, 167, 69)); // green
-        styleButton(declineBtn, new Color(255, 193, 7)); // yellow
-        styleButton(exitBtn, new Color(220, 53, 69)); // red
+        styleButton(approveBtn, new Color(40, 167, 69));
+        styleButton(declineBtn, new Color(255, 193, 7));
+        styleButton(exitBtn, new Color(220, 53, 69));
 
         approveBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Approved"));
         declineBtn.addActionListener(e -> updateLeaveStatus(leaveModel, leaveTable, "Declined"));
@@ -272,14 +272,12 @@ public class ManagerDashboard extends JFrame {
             setLocationRelativeTo(parent);
             setLayout(new BorderLayout(10, 10));
 
-            // Title
             JLabel title = new JLabel("Routine Details");
             title.setFont(new Font("Segoe UI", Font.BOLD, 14));
             JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             titlePanel.add(title);
             add(titlePanel, BorderLayout.NORTH);
 
-            // Form panel
             JPanel formPanel = new JPanel(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.insets = new Insets(8, 8, 8, 8);
@@ -315,7 +313,6 @@ public class ManagerDashboard extends JFrame {
 
             add(formPanel, BorderLayout.CENTER);
 
-            // Buttons
             JPanel buttonPanel = new JPanel();
             JButton saveBtn = new JButton("Save");
             saveBtn.setBackground(new Color(0, 120, 215));
@@ -329,7 +326,6 @@ public class ManagerDashboard extends JFrame {
             buttonPanel.add(cancelBtn);
             add(buttonPanel, BorderLayout.SOUTH);
 
-            // === Event Logic (Giữ nguyên logic cũ) ===
             saveBtn.addActionListener(e -> {
                 try {
                     String dateInput = workDate.getText().trim();
@@ -446,17 +442,15 @@ public class ManagerDashboard extends JFrame {
             super(parent, "View Routine for " + empId, true);
             setSize(600, 450);
             setLocationRelativeTo(parent);
-            setLayout(new BorderLayout(10, 10)); // spacing between components
-            getContentPane().setBackground(Color.WHITE); // background color
+            setLayout(new BorderLayout(10, 10));
+            getContentPane().setBackground(Color.WHITE);
 
-            // Title Label
             JLabel title = new JLabel("Routine Schedule for Employee ID: " + empId);
             title.setFont(new Font("Segoe UI", Font.BOLD, 18));
             title.setHorizontalAlignment(SwingConstants.CENTER);
             title.setBorder(new EmptyBorder(10, 0, 10, 0));
             add(title, BorderLayout.NORTH);
 
-            // Text Area with scroll
             JTextArea routineArea = new JTextArea();
             routineArea.setEditable(false);
             routineArea.setFont(new Font("Consolas", Font.PLAIN, 14));
@@ -519,7 +513,6 @@ public class ManagerDashboard extends JFrame {
             scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
             add(scrollPane, BorderLayout.CENTER);
 
-            // Close Button
             JButton closeBtn = new JButton("Close");
             closeBtn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             closeBtn.setFocusPainted(false);

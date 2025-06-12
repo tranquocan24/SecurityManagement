@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class Employee implements Profile{
+public class Employee implements Profile {
     private String id;
     private String fullName;
     private String password;
@@ -41,7 +41,6 @@ public class Employee implements Profile{
         int fine = extraLeaves * 10000;
         int finalSalary = baseSalary - fine;
 
-        // Update this employee's line in employee.txt
         updateEmployeeFileWithSalary(finalSalary);
 
         return finalSalary;
@@ -54,7 +53,6 @@ public class Employee implements Profile{
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split("\\|");
                 if (parts.length >= 6 && parts[0].equals(this.id)) {
-                    // Replace this employee's line with updated salary
                     updatedContent.append(String.join("|", id, fullName, password, gender,
                             String.valueOf(leavesTaken), workLocation, String.valueOf(salary)));
                 } else {
@@ -66,15 +64,12 @@ public class Employee implements Profile{
             e.printStackTrace();
         }
 
-        // Write updated content back to the file
         try (java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter("employees.txt"))) {
             bw.write(updatedContent.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    
 
     @Override
     public String getId() {

@@ -27,8 +27,8 @@ public class EmployeeDashboard extends JFrame {
         logoutButton.setFocusPainted(false);
         logoutButton.setPreferredSize(new Dimension(80, 40));
         logoutButton.addActionListener(e -> {
-            dispose(); // close current window
-            new LoginFrame(); // go back to login
+            dispose();
+            new LoginFrame();
         });
 
         JPanel bottomPanel = new JPanel();
@@ -126,7 +126,6 @@ public class EmployeeDashboard extends JFrame {
         top.add(form, BorderLayout.CENTER);
         top.add(requestButton, BorderLayout.EAST);
 
-        // Table
         String[] columnNames = { "Date", "Status" };
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable leaveTable = new JTable(tableModel);
@@ -148,7 +147,7 @@ public class EmployeeDashboard extends JFrame {
                 JOptionPane.showMessageDialog(panel, "Leave requested for: " + day);
                 dayField.setText("");
 
-                tableModel.setRowCount(0); // clear and reload
+                tableModel.setRowCount(0);
                 loadLeaveRequests(emp.getId(), tableModel);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -156,7 +155,7 @@ public class EmployeeDashboard extends JFrame {
         });
         JButton reloadBtn = new JButton("Reload");
         reloadBtn.addActionListener(e -> {
-            tableModel.setRowCount(0); 
+            tableModel.setRowCount(0);
             loadLeaveRequests(emp.getId(), tableModel);
         });
 

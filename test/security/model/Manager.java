@@ -1,6 +1,6 @@
 package model;
 
-public class Manager implements Profile{
+public class Manager implements Profile {
     private String id;
     private String fullName;
     private String password;
@@ -31,5 +31,4 @@ public class Manager implements Profile{
         return String.join("|", id, fullName, password, gender);
     }
 
-    
 }
