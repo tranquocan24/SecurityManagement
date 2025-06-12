@@ -154,6 +154,13 @@ public class EmployeeDashboard extends JFrame {
                 ex.printStackTrace();
             }
         });
+        JButton reloadBtn = new JButton("Reload");
+        reloadBtn.addActionListener(e -> {
+            tableModel.setRowCount(0); 
+            loadLeaveRequests(emp.getId(), tableModel);
+        });
+
+        panel.add(reloadBtn, BorderLayout.SOUTH);
 
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(leaveTable), BorderLayout.CENTER);
