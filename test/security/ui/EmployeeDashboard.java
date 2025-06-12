@@ -3,46 +3,58 @@ package ui;
 import model.Employee;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.time.*;
 
 public class EmployeeDashboard extends JFrame {
+
     public EmployeeDashboard(Employee emp) {
         setTitle("Employee Dashboard - " + emp.getFullName());
-        setSize(600, 400);
+        setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JTabbedPane tabs = new JTabbedPane();
-        tabs.add("Info", createInfoPanel(emp));
-        tabs.add("Request Leave", createLeavePanel(emp));
+        tabs.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        tabs.add("Personal Info", createInfoPanel(emp));
+        tabs.add("Leave Request", createLeavePanel(emp));
 
         JButton logoutButton = new JButton("Logout");
+        logoutButton.setBackground(new Color(220, 53, 69));
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFont(new Font("SansSerif", Font.BOLD, 13));
+        logoutButton.setFocusPainted(false);
+        logoutButton.setPreferredSize(new Dimension(80, 40));
         logoutButton.addActionListener(e -> {
             dispose(); // close current window
-            new LoginFrame(); // open login screen (you must have one)
+            new LoginFrame(); // go back to login
         });
 
-        // Wrap tabs and button in one panel
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        bottomPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        bottomPanel.add(logoutButton);
+
         JPanel content = new JPanel(new BorderLayout());
         content.add(tabs, BorderLayout.CENTER);
-        content.add(logoutButton, BorderLayout.SOUTH);
+        content.add(bottomPanel, BorderLayout.SOUTH);
 
         add(content);
         setVisible(true);
     }
 
     private JPanel createInfoPanel(Employee emp) {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
         JTextArea infoArea = new JTextArea();
         infoArea.setEditable(false);
-        StringBuilder sb = new StringBuilder();
+        infoArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        infoArea.setBackground(new Color(245, 245, 245));
+        infoArea.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
+        StringBuilder sb = new StringBuilder();
         sb.append("ID: ").append(emp.getId()).append("\n");
         sb.append("Name: ").append(emp.getFullName()).append("\n");
         sb.append("Gender: ").append(emp.getGender()).append("\n");
@@ -64,20 +76,19 @@ public class EmployeeDashboard extends JFrame {
                     String block = p[4];
                     LocalDate startDate = LocalDate.parse(p[5]);
 
-                    // Search next 30 days for matching days
                     for (int i = 0; i < 30 && shown < 7; i++) {
                         LocalDate checkDate = today.plusDays(i);
                         DayOfWeek dow = checkDate.getDayOfWeek();
-
                         if (dow.name().equals(dayName) && !checkDate.isBefore(startDate)) {
                             sb.append(String.format("%s (%s): Duty at Block %s from %s to %s\n",
                                     dow, checkDate, block, startTime, endTime));
                             shown++;
-                            break; // Stop checking further days for this routine line
+                            break;
                         }
                     }
                 }
             }
+
             if (shown == 0) {
                 sb.append("No routine scheduled in the next 30 days.\n");
             }
@@ -97,23 +108,31 @@ public class EmployeeDashboard extends JFrame {
     }
 
     private JPanel createLeavePanel(Employee emp) {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JTextField dayField = new JTextField();
         JButton requestButton = new JButton("Request Leave");
 
-        JPanel top = new JPanel(new GridLayout(2, 2));
-        top.add(new JLabel("Enter day (e.g., 2025-06-05):"));
-        top.add(dayField);
-        top.add(new JLabel(" "));
-        top.add(requestButton);
+        requestButton.setBackground(new Color(40, 167, 69));
+        requestButton.setForeground(Color.WHITE);
+        requestButton.setFocusPainted(false);
+        requestButton.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        // Table to display existing leave requests
+        JPanel top = new JPanel(new BorderLayout(10, 10));
+        JPanel form = new JPanel(new GridLayout(2, 1, 5, 5));
+        form.add(new JLabel("Enter leave date (YYYY-MM-DD):"));
+        form.add(dayField);
+        top.add(form, BorderLayout.CENTER);
+        top.add(requestButton, BorderLayout.EAST);
+
+        // Table
         String[] columnNames = { "Date", "Status" };
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
         JTable leaveTable = new JTable(tableModel);
+        leaveTable.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        leaveTable.setRowHeight(22);
 
-        // Load leave requests for this employee
         loadLeaveRequests(emp.getId(), tableModel);
 
         requestButton.addActionListener(e -> {
@@ -127,9 +146,9 @@ public class EmployeeDashboard extends JFrame {
                 bw.write(emp.getId() + "|" + day + "|Pending");
                 bw.newLine();
                 JOptionPane.showMessageDialog(panel, "Leave requested for: " + day);
+                dayField.setText("");
 
-                // Refresh table
-                tableModel.setRowCount(0); // clear existing
+                tableModel.setRowCount(0); // clear and reload
                 loadLeaveRequests(emp.getId(), tableModel);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -156,5 +175,4 @@ public class EmployeeDashboard extends JFrame {
             e.printStackTrace();
         }
     }
-
 }

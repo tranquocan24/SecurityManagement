@@ -3,7 +3,6 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.util.*;
 import model.*;
 
 public class LoginFrame extends JFrame {
@@ -13,26 +12,56 @@ public class LoginFrame extends JFrame {
     public LoginFrame() {
         setTitle("Campus Security System - Login");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(400, 300);
+        setSize(450, 350);
         setLocationRelativeTo(null);
 
-        JButton registerEmployeeBtn = new JButton("Register as Employee");
-        JButton registerManagerBtn = new JButton("Register as Manager");
-        JButton loginEmployeeBtn = new JButton("Login as Employee");
-        JButton loginManagerBtn = new JButton("Login as Manager");
+        // Main panel
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        mainPanel.setBackground(Color.WHITE);
 
+        JLabel titleLabel = new JLabel("Welcome to Campus Security System");
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        mainPanel.add(titleLabel);
+
+        // Buttons
+        JButton registerEmployeeBtn = createStyledButton("Register as Employee");
+        JButton registerManagerBtn = createStyledButton("Register as Manager");
+        JButton loginEmployeeBtn = createStyledButton("Login as Employee");
+        JButton loginManagerBtn = createStyledButton("Login as Manager");
+
+        // Add action listeners
         registerEmployeeBtn.addActionListener(e -> registerEmployee());
         registerManagerBtn.addActionListener(e -> registerManager());
         loginEmployeeBtn.addActionListener(e -> loginEmployee());
         loginManagerBtn.addActionListener(e -> loginManager());
 
-        setLayout(new GridLayout(4, 1, 10, 10));
-        add(registerEmployeeBtn);
-        add(registerManagerBtn);
-        add(loginEmployeeBtn);
-        add(loginManagerBtn);
+        // Add buttons to panel
+        mainPanel.add(registerEmployeeBtn);
+        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(registerManagerBtn);
+        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(loginEmployeeBtn);
+        mainPanel.add(Box.createVerticalStrut(10));
+        mainPanel.add(loginManagerBtn);
 
+        add(mainPanel);
         setVisible(true);
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setMaximumSize(new Dimension(250, 40));
+        button.setFocusPainted(false);
+        button.setBackground(new Color(59, 89, 182));
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        return button;
     }
 
     private void registerEmployee() {
@@ -72,8 +101,7 @@ public class LoginFrame extends JFrame {
         JTextField genderField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
 
-        Object[] fields = { "ID:", idField, "Full Name:", nameField, "Gender:", genderField, "Password:",
-                passwordField };
+        Object[] fields = { "ID:", idField, "Full Name:", nameField, "Gender:", genderField, "Password:", passwordField };
         int option = JOptionPane.showConfirmDialog(this, fields, "Register Manager", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             Manager manager = new Manager(idField.getText(), nameField.getText(),
